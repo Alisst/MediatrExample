@@ -1,0 +1,36 @@
+﻿1) nuget > MediatR ve MediatR.Extensions.Microsoft.DependencyInjection kurulumları yapılıyor
+2) Med diye bir klasör açıp Commands ve Queries klasörlerini altına ekliyoruz. Normalde bu klasörlerinin ayrı projelerde olması gerekiyor. Şimdilik
+burada sadece MediatR'ın basit kullanımından bahsedip diğer projeye dönüş yapacağız.
+3) Projeye Entities diye bir klasör açalım. İçine de db'den okuyacağımız örneğin bir entity ekliyoruz. ProductEntity
+4) Queries altına GetProductByIdQuery class'ı açalım. Burası bizim için bir get isteği yapacak içine de parametre alabilecek olan bir query aslında.
+	IRequest<TResponse>'den türeteceğiz mediatR içinden. Bu query çağrıldığında geri ne döndürmek istediğimizi belirtiyoruz TReponse olarak.
+	Burada Product db entity dönmek yerine Id ve adını döndürecek bir entity oluşturalım.GetProductViewModel (Queries altına yine) 
+	Query gönderilirken bir parametre almasını istiyorsak GetProductByIdQuery'e parametre olarak ekliyoruz. Query isminden yola çıkarak Id olacak property
+	Buraya bir class daha ekliyoruz. GetProductByIdQueryHandler. Bu query'i handle edecek bir class. IRequestHandler'dan türeyecek. TRequest, TResponse alıyor.
+		Handler hangi request'i handle edecek burada tanımlıyoruz.
+		IRequestHandler<GetProductByIdQuery, GetProductViewModel>
+		Interface implement ediyoruz. Handle isminde bir metod geliyor.Handle metodu çalıştığında query tetiklenmiş demektir.
+		Normalde burada bir DB'den okuma işlemi yapılması gerekiyor ama şimdilik manuel dönüş yapıyoruz.
+
+5) Test etmek için api controller ekliyoruz. ProductController ctor'a da IMediator ekliyoruz.
+6) Get isminde bir HttpGet metodu yazıyoruz. [HttpGet("{id}")]
+	_mediator.Send bizden bir request objesi istiyor. var query = new GetProductByIdQuery() {Id = id}; query'i send'e gönderiyoruz.
+	Controller tarafında biz sadece bir query yarattık ve mediator ile send ettik.
+	Send metodu bu query'nin ilgili handler'ını bulacak. Sonrasında içindeki Handle metodunu çalıştırıp bir viewModel dönecek, 
+	controller de dışarı bu response'u dönmüş olacak.
+7) Queries altın GetAllProductQuery yapalım mesela. Dönüş olarak da List<GetProductViewModel> dönsün
+	Burada Handlerı içinde yazalım. Ayrı class yerine. GetAllProductQueryHandler
+8) ProductController > GetAll yazalım HttpGet olarak.
+	var query = new GetAllProductQuery(); _mediator.Send(query) diyip işimiz bitiyor
+	Handle içindekileri liste olarak geri dönecek.
+9) Startup.cs'de ConfigureService'e services.AddMediatR yazmamız lazım. parametre olarak Assembly array istiyor.
+	services.AddMediatR(typeof(Startup)) diyip Startup ile başlayan projedeki tüm assembly'leri eklemiş olacağız. 
+	Bu şekilde MediatR class'ları tarayıp IRequest ve IRequestHandler'ları bulabiliyor.
+10) Bir tane de command oluşturalım. CreateProductCommand > Commands klasörü altına
+	Geri Guid dönsün. IRequest<Guid>
+	Parametre olarak dışardan Name-sring, Quantity-int,Value-decimal göndersin.
+	İç tarafa CreateProductCommandHandler ekliyoruz,  IRequestHandler<CreateProductCommand, Guid>
+	Handle içinde DB işlemleri, EventBus'a gönderim işlemleri yapılabilir. Biz Guid.NewGuid dönelim.
+11)Controller'a HttpPost ekliyoruz. Parametre olarak dışardan CreateProductCommand alacağız.
+	Dışardan gelen command'ı send içine ekliyoruz.
+	Command'in handle metodu çalışacak.

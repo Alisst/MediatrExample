@@ -33,4 +33,4 @@ burada sadece MediatR'ın basit kullanımından bahsedip diğer projeye dönüş
 	Handle içinde DB işlemleri, EventBus'a gönderim işlemleri yapılabilir. Biz Guid.NewGuid dönelim.
 11)Controller'a HttpPost ekliyoruz. Parametre olarak dışardan CreateProductCommand alacağız.
 	Dışardan gelen command'ı send içine ekliyoruz.
-	Command'in handle metodu çalışacak.
+	Command'in handle metodu çalışacak. 
